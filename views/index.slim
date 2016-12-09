@@ -1,1 +1,15 @@
-p Hello World
+link [rel='stylesheet' href='#{mount_point}/assets/wolf_core.css']
+
+== slim :'_header'
+
+form [action='#{mount_point}' method='POST' enctype='multipart/form-data']
+  p
+    label [for='enrollment-term-id'] Enrollment Term
+    select#enrollment-term-id [name='enrollment-term-id']
+      - MetroEnrollmentApp.enrollment_terms.each do |id, name|
+        option [value='#{id}'] #{name}
+
+  p
+    label [for='enrollment-data-file'] Enrollment Data CSV
+    input#enrollment-data-file [name='enrollment-data-file' type='file']
+    input.btn-cu [type='submit']

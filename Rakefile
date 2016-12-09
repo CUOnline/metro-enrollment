@@ -2,7 +2,7 @@ require 'resque/tasks'
 require 'rake/testtask'
 
 task :'resque:setup' do
-  require './metro_enrollment_worker'
+  require './metro_enrollment_app'
 end
 
 Rake::TestTask.new do |t|
