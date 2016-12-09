@@ -32,13 +32,30 @@ class MetroEnrollmentAppTest < Minitest::Test
     csv_file = 'test.csv'
     CSV.expects(:read).with(csv_file).returns(csv_rows)
     Resque.expects(:enqueue).with(MetroEnrollmentWorker, csv_rows, enrollment_term_id, email)
+    app.any_instance.expects(:form_validation_errors).returns([])
 
     login({:user_email => email})
     post '/', {'enrollment-data-file' => {:tempfile => csv_file}, 'enrollment-term-id' => enrollment_term_id}
 
     assert_equal 302, last_response.status
     follow_redirect!
-    assert_equal MetroEnrollmentApp.mount_point, last_request.path
+    assert_equal '/', last_request.path
+  end
+
+  def test_post_validation_errors
+    errors = ['Uh oh this is an error!', 'So is this']
+    Resque.expects(:enqueue).never
+    app.any_instance.expects(:form_validation_errors).returns(errors)
+
+    login
+    post '/'
+
+    errors.each do |e|
+      assert_match e, last_request.env['rack.session']['flash'][:danger]
+    end
+    assert_equal 302, last_response.status
+    follow_redirect!
+    assert_equal '/', last_request.path
   end
 
   def test_post_unauthenticated

@@ -38,6 +38,8 @@ class Minitest::Test
       '76' => 'Summer 2015',
       '77' => 'Fall 2016'
     })
+
+    MetroEnrollmentApp.settings.stubs(:mount).returns('')
   end
 
   def login(session_params = {})
