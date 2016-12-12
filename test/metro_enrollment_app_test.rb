@@ -29,13 +29,13 @@ class MetroEnrollmentAppTest < Minitest::Test
     email = 'test@example.com'
     enrollment_term_id = '75'
     csv_rows = [[1,2,3],[4,5,6]]
-    csv_file = 'test.csv'
-    CSV.expects(:read).with(csv_file).returns(csv_rows)
+    csv_params = {'tempfile' => 'test.csv'}
+    app.any_instance.expects(:parse_csv).with(csv_params).returns(csv_rows)
     Resque.expects(:enqueue).with(MetroEnrollmentWorker, csv_rows, enrollment_term_id, email)
     app.any_instance.expects(:form_validation_errors).returns([])
 
     login({:user_email => email})
-    post '/', {'enrollment-data-file' => {:tempfile => csv_file}, 'enrollment-term-id' => enrollment_term_id}
+    post '/', {'enrollment-data-file' => csv_params, 'enrollment-term-id' => enrollment_term_id}
 
     assert_equal 302, last_response.status
     follow_redirect!

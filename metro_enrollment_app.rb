@@ -2,7 +2,7 @@ require 'bundler/setup'
 require 'wolf_core'
 require 'csv'
 require_relative './metro_enrollment_worker'
-require_relative './validation_helper'
+require_relative './metro_enrollment_helper'
 
 class MetroEnrollmentApp < WolfCore::App
   set :title, 'MSU/CU Enrollment'
@@ -13,7 +13,12 @@ class MetroEnrollmentApp < WolfCore::App
   enable :exclude_js
   enable :exclude_css
 
-  helpers ValidationHelper
+  helpers MetroEnrollmentHelper
+
+  REQUIRED_CSV_HEADERS = [
+    'id', 'last name', 'first name', 'email',
+    'course number', 'course_code', 'section_number'
+  ]
 
   get '/' do
     slim :index
@@ -24,12 +29,17 @@ class MetroEnrollmentApp < WolfCore::App
     if errors.any?
       flash[:danger] = errors.join("\n")
     else
-      Resque.enqueue(
-        MetroEnrollmentWorker,
-        CSV.read(params['enrollment-data-file'][:tempfile]),
-        params['enrollment-term-id'],
-        session['user_email']
-      )
+      begin
+        rows = parse_csv(params['enrollment-data-file'])
+        Resque.enqueue(
+          MetroEnrollmentWorker,
+          rows,
+          params['enrollment-term-id'],
+          session['user_email']
+        )
+      rescue CSV::MalformedCSVError => e
+        flash[:danger] = "Invalid CSV - #{e.message}"
+      end
     end
 
     redirect mount_point

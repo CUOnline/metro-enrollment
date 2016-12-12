@@ -1,13 +1,9 @@
 require_relative './test_helper'
-require_relative '../validation_helper'
 
-class ValidationHelperTest < Minitest::Test
-  include ValidationHelper
+class MetroEnrollmentHelperTest < Minitest::Test
+  include MetroEnrollmentHelper
 
   def test_form_validation_errors_valid_inputs
-    self.expects(:csv_validation_errors)
-        .with({:tempfile => 'test.csv'})
-        .returns([])
     params = {
       'enrollment-data-file' => {:tempfile => 'test.csv'},
       'enrollment-term-id' => '75'
@@ -30,19 +26,5 @@ class ValidationHelperTest < Minitest::Test
     ]
 
     assert_equal expected, form_validation_errors(params, session)
-  end
-
-  def test_form_validation_csv_errors
-    csv_errors = ['Bad CSV', 'No data!']
-    self.expects(:csv_validation_errors)
-        .with({:tempfile => 'test.csv'})
-        .returns(csv_errors)
-    params = {
-      'enrollment-data-file' => {:tempfile => 'test.csv'},
-      'enrollment-term-id' => '75'
-    }
-    session = { 'user_email' => 'test@example.com' }
-
-    assert_equal csv_errors, form_validation_errors(params, session)
   end
 end
