@@ -30,7 +30,7 @@ class MetroEnrollmentApp < WolfCore::App
       flash[:danger] = errors.join("\n")
     else
       begin
-        rows = parse_csv(params['enrollment-data-file'])
+        rows = parse_csv(params['enrollment-data-file'][:tempfile])
         Resque.enqueue(
           MetroEnrollmentWorker,
           rows,

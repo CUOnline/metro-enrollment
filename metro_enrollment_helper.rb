@@ -17,7 +17,23 @@ module MetroEnrollmentHelper
     errors
   end
 
-  def parse_csv(csv_params)
-    return []
+  def parse_csv(file)
+    rows = []
+    CSV.read(file, {:headers => true}).each do |row|
+      required = MetroEnrollmentApp::REQUIRED_CSV_HEADERS
+      row = row.to_h
+
+      if required.detect{|header| !row.keys.include?(header)}
+        raise CSV::MalformedCSVError, 'Some required field names are missing'
+      end
+
+      if required.detect{|header| !row[header] || row[header].to_s.empty?}
+        raise CSV::MalformedCSVError, 'Some required data fields are blank'
+      end
+
+      rows << row
+    end
+
+    rows
   end
 end
