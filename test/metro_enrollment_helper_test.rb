@@ -100,19 +100,20 @@ class MetroEnrollmentHelperTest < Minitest::Test
     assert_match (/fields are blank/), error.message
   end
 
-  def test_find_user_api_existing
+  def test_find_user_api
     account_id = 10
     user_id = 123
     app.settings.stubs(:canvas_account_id).returns(account_id)
     users = [{
       'id' => user_id
     }]
-    stub_request(:get, /accounts\/#{account_id}\/users\?.+search_term=metro_#{user_id}/)
-      .to_return(
-        :body => users.to_json,
-        :headers => {'Content-Type' => 'application/json', :link => []})
+    request = stub_request(:get, /accounts\/#{account_id}\/users\?.+search_term=metro_#{user_id}/)
+                .to_return(
+                  :body => users.to_json,
+                  :headers => {'Content-Type' => 'application/json', :link => []})
 
     assert_equal user_id, find_user_api({'id' => user_id})
+    assert_requested request
   end
 
   def test_find_user_api_nonexistent
@@ -142,7 +143,7 @@ class MetroEnrollmentHelperTest < Minitest::Test
     end
   end
 
-  def test_find_user_redshift_existing
+  def test_find_user_redshift
     user_id = 123
     self.expects(:canvas_data).returns([{'canvas_id' => user_id}])
     assert_equal user_id, find_user_redshift({'id' => user_id})
@@ -169,12 +170,96 @@ class MetroEnrollmentHelperTest < Minitest::Test
       'first_name' => 'Test',
       'last_name' => 'Student'
     }
-    stub_request(:post, /accounts\/#{@account_id}\/users/)
-      .to_return(
-        :body => user.to_json,
-        :status => 200,
-        :headers => {'Content-Type' => 'application/json', :link => []})
+    request = stub_request(:post, /accounts\/#{@account_id}\/users/)
+                .to_return(
+                  :body => user.to_json,
+                  :status => 200,
+                  :headers => {'Content-Type' => 'application/json', :link => []})
 
     assert_equal user['id'], create_user(user)
+    assert_requested request
+  end
+
+  def test_find_section
+    row = {
+      'course code' => 'BIO',
+      'course number' => '101',
+      'section number' => '01'
+    }
+    enrollment_term_id = 75
+    section_id = 789
+    self.expects(:metro_to_ucd)
+        .with(row['course code'])
+        .returns(row['course code'])
+    self.expects(:canvas_data)
+        .with(regexp_matches(/BIO 101 01.+#{enrollment_term_id}/))
+        .returns([{'canvas_id' => section_id}])
+
+    assert_equal section_id, find_section(row, enrollment_term_id)
+  end
+
+  def test_find_section_nonexistent
+    row = {
+      'course code' => 'BIO',
+      'course number' => '101',
+      'section number' => '01'
+    }
+    enrollment_term_id = 75
+    self.expects(:metro_to_ucd)
+        .with(row['course code'])
+        .returns(row['course code'])
+    self.expects(:canvas_data)
+        .with(regexp_matches(/BIO 101 01.+#{enrollment_term_id}/))
+        .returns([])
+
+    assert_raises MetroEnrollmentHelper::QueryError do
+      find_section(row, enrollment_term_id)
+    end
+  end
+
+  def test_find_section_multiple
+    row = {
+      'course code' => 'BIO',
+      'course number' => '101',
+      'section number' => '01'
+    }
+    enrollment_term_id = 75
+    section_id = 789
+    self.expects(:metro_to_ucd)
+        .with(row['course code'])
+        .returns(row['course code'])
+    self.expects(:canvas_data)
+        .with(regexp_matches(/BIO 101 01.+#{enrollment_term_id}/))
+        .returns([{'canvas_id' => section_id}, {'canvas_id' => section_id}])
+
+    assert_raises MetroEnrollmentHelper::QueryError do
+      find_section(row, enrollment_term_id)
+    end
+  end
+
+  def test_enroll_user
+    section_id = 456
+    request = stub_request(:post, /sections\/#{section_id}\/enrollments/)
+                .to_return(
+                  :body => {}.to_json,
+                  :status => 200,
+                  :headers => {'Content-Type' => 'application/json', :link => []})
+
+    enroll_user(123, section_id)
+    assert_requested request
+  end
+
+  def test_enroll_user_failed
+    section_id = 456
+    request = stub_request(:post, /sections\/#{section_id}\/enrollments/)
+                .to_return(
+                  :body => {}.to_json,
+                  :status => 500,
+                  :headers => {'Content-Type' => 'application/json', :link => []})
+
+    assert_raises MetroEnrollmentHelper::ApiError do
+      enroll_user(123, section_id)
+    end
+    assert_requested request
   end
 end

@@ -3,6 +3,27 @@ module MetroEnrollmentHelper
   class QueryError < StandardError; end
   class ApiError < StandardError; end
 
+  def metro_to_ucd(code)
+    case code
+      when 'AST'
+        'PHYS'
+      when 'F^A'
+        'FINE'
+      when 'FR^^'
+        'FREN'
+      when 'PHY'
+        'PHYS'
+      when 'PSY^'
+         'PSYC'
+      when 'P^SC'
+        'PSCI'
+      when 'SOC^'
+        'SOCY'
+      else
+        code
+    end
+  end
+
   def form_validation_errors(params, session)
     errors = []
     if params['enrollment-term-id'].nil?
@@ -75,7 +96,7 @@ module MetroEnrollmentHelper
     if results.count > 1
       raise QueryError, "Multiple users found"
     else
-      results.collect{|user| user['canvas_id']}.first
+      results.collect{ |user| user['canvas_id'] }.first
     end
   end
 
@@ -88,7 +109,7 @@ module MetroEnrollmentHelper
     elsif response.body.count > 1
       raise QueryError, 'Multiple users found'
     else
-      response.body.collect{|user| user['id']}.first
+      response.body.collect{ |user| user['id'] }.first
     end
   end
 
@@ -112,6 +133,47 @@ module MetroEnrollmentHelper
       raise ApiError, "API error while creating user: #{response.body}"
     else
       response.body['id']
+    end
+  end
+
+  def find_section(row, enrollment_term_id)
+    course_name = "#{metro_to_ucd(row['course code'])} "\
+                  "#{row['course number']} "\
+                  "#{row['section number']}"
+
+    query_string =
+      "SELECT "\
+      "distinct course_section_dim.canvas_id "\
+      "FROM "\
+        "course_dim "\
+      "JOIN course_section_dim "\
+        "ON course_section_dim.course_id = course_dim.id "\
+      "WHERE "\
+        "course_section_dim.name = '#{course_name}' AND "\
+        "course_dim.enrollment_term_id = #{enrollment_term_id} "
+
+    results = canvas_data(query_string)
+    if results.count > 1
+      raise QueryError, 'Multiple course sections found'
+    elsif results.empty?
+      raise QueryError, 'No matching course sections found'
+    else
+      results.collect{ |section| section['canvas_id'] }.first
+    end
+  end
+
+  def enroll_user(user_id, section_id)
+    url = "sections/#{section_id}/enrollments"
+    payload = {
+      'enrollment' => {
+        'notify' => true,
+        'user_id' => user_id,
+        'type' => 'StudentEnrollment'
+      }
+    }
+    response = canvas_api.post(url, payload)
+    if response.status != 200
+      raise ApiError, "API error while enrolling user: #{response.body}"
     end
   end
 end
