@@ -22,7 +22,14 @@ module MetroEnrollmentHelper
 
   def parse_csv(file)
     rows = []
-    CSV.read(file, {:headers => true}).each do |row|
+    opts = {
+      :headers => true,
+      :header_converters => lambda do |header|
+        header.to_s.downcase.gsub('_', ' ')
+      end
+    }
+
+    CSV.read(file, opts).each do |row|
       row = row.to_h
       required = if self.class::const_defined?(:REQUIRED_CSV_HEADERS)
         self.class::REQUIRED_CSV_HEADERS

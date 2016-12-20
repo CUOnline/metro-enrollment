@@ -17,7 +17,7 @@ class MetroEnrollmentApp < WolfCore::App
 
   REQUIRED_CSV_HEADERS = [
     'id', 'last name', 'first name', 'email',
-    'course number', 'course_code', 'section_number'
+    'course number', 'course code', 'section number'
   ]
 
   get '/' do
