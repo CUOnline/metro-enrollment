@@ -40,6 +40,9 @@ class Minitest::Test
     })
 
     MetroEnrollmentApp.settings.stubs(:mount).returns('')
+
+    @account_id = 10
+    app.settings.stubs(:canvas_account_id).returns(@account_id)
   end
 
   def login(session_params = {})

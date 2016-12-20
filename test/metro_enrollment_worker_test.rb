@@ -1,4 +1,4 @@
 require_relative './test_helper'
 
-class OnlineStudentsWorkerTest < Minitest::Test
+class MetroEnrollmentWorkerTest < Minitest::Test
 end
