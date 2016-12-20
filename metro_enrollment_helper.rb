@@ -26,7 +26,7 @@ module MetroEnrollmentHelper
 
   def form_validation_errors(params, session)
     errors = []
-    if params['enrollment-term-id'].nil?
+    if params['enrollment-term-id'].nil? || params['enrollment-term-id'].empty?
       errors << 'Please select an enrollment term'
     end
 

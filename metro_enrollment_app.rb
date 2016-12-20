@@ -33,7 +33,7 @@ class MetroEnrollmentApp < WolfCore::App
   post '/' do
     errors = form_validation_errors(params, session)
     if errors.any?
-      flash[:danger] = errors.join("\n")
+      flash[:danger] = errors.join("<br/>")
     else
       begin
         rows = parse_csv(params['enrollment-data-file'][:tempfile])
