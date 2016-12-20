@@ -176,4 +176,14 @@ module MetroEnrollmentHelper
       raise ApiError, "API error while enrolling user: #{response.body}"
     end
   end
+
+  def send_output(email, output_rows)
+    mail = Mail.new
+    mail.from = settings.from_email
+    mail.to = email
+    mail.subject = settings.email_subject
+    mail.attachments['enrollment-results.csv'] = output_rows.join("\n") + "\n"
+    mail.body = settings.email_body
+    mail.deliver!
+  end
 end

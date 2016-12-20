@@ -262,4 +262,26 @@ class MetroEnrollmentHelperTest < Minitest::Test
     end
     assert_requested request
   end
+
+  def test_send_ouptut
+    email = 'test@example.com'
+    subject = 'subject'
+    from = 'from@example.com'
+    body = 'body'
+    app.settings.stubs(:email_subject).returns(subject)
+    app.settings.stubs(:from_email).returns(from)
+    app.settings.stubs(:email_body).returns(body)
+    output_rows = [['h1', 'h2', 'h3'], ['d1', 'd2', 'd3']]
+    mail_mock = OpenStruct.new(:attachments => {})
+    mail_mock.expects(:deliver!)
+    Mail.expects(:new).returns(mail_mock)
+
+    send_output(email, output_rows)
+
+    assert_equal from, mail_mock.from
+    assert_equal email, mail_mock.to
+    assert_equal subject, mail_mock.subject
+    assert_equal body, mail_mock.body
+    assert_equal output_rows.join("\n") + "\n", mail_mock.attachments.first[1]
+  end
 end
