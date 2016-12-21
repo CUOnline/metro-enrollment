@@ -43,6 +43,8 @@ class MetroEnrollmentApp < WolfCore::App
           params['enrollment-term-id'],
           session['user_email']
         )
+        flash[:success] = "Report is being generated and will be sent to "\
+                          "#{session['user_email']} when complete"
       rescue CSV::MalformedCSVError => e
         flash[:danger] = "Invalid CSV - #{e.message}"
       end
