@@ -275,6 +275,7 @@ class MetroEnrollmentHelperTest < Minitest::Test
     mail_mock = OpenStruct.new(:attachments => {})
     mail_mock.expects(:deliver!)
     Mail.expects(:new).returns(mail_mock)
+    expected = "h1,h2,h3\nd1,d2,d3\n"
 
     send_output(email, output_rows)
 
@@ -282,6 +283,6 @@ class MetroEnrollmentHelperTest < Minitest::Test
     assert_equal email, mail_mock.to
     assert_equal subject, mail_mock.subject
     assert_equal body, mail_mock.body
-    assert_equal output_rows.join("\n") + "\n", mail_mock.attachments.first[1]
+    assert_equal expected, mail_mock.attachments.first[1]
   end
 end

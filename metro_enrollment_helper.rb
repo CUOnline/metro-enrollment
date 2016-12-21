@@ -178,11 +178,14 @@ module MetroEnrollmentHelper
   end
 
   def send_output(email, output_rows)
+    # Array of arrays to CSV string
+    csv_data = output_rows.map{ |r| r.join(',') }.join("\n") + "\n"
+
     mail = Mail.new
     mail.from = settings.from_email
     mail.to = email
     mail.subject = settings.email_subject
-    mail.attachments['enrollment-results.csv'] = output_rows.join("\n") + "\n"
+    mail.attachments['enrollment-results.csv'] = csv_data
     mail.body = settings.email_body
     mail.deliver!
   end
