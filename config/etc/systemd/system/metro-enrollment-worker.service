@@ -1,0 +1,16 @@
+[Unit]
+Description=Metro student enroller
+Wants=redis.service
+After=redis.service
+Wants=redis_6379.service
+After=redis_6379.service
+
+[Service]
+User=apache
+WorkingDirectory=/var/www/html/cu-online/metro-enrollment/current
+ExecStart=/bin/bash -lc 'bundle exec rake resque:work QUEUE=metro-enrollment'
+Restart=always
+KillMode=process
+
+[Install]
+WantedBy=default.target
