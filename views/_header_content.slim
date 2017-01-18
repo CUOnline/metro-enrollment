@@ -1,0 +1,18 @@
+p This tool accepts a list of data and uses it to enroll MSU students in CU Canvas courses.
+
+p It will check if the user already exists by searching for the specified email as well as SIS IDs and unique names matching the specified id (with the prefix "metro_"). If no user is found, a new one will be created.
+
+p The user will be enrolled in the specified course section, as long as the provided course data unambigiously identifies a unique course. If multiple sections exist have the same name and the same enrollment term, this ambiguity needs to be resolved before the enrollment will succeed.
+
+p Upon completion, you will receive an email with a copy of the input data along with any errors or status messages for each record.
+
+p The data should be in CSV format with the following headers/fields (any order, case-insensitive).
+
+ul
+  li first name
+  li last name
+  li email
+  li id (The ID of the student in the Metro system)
+  li course code (e.g. PHY, MATH)
+  li course number (e.g. 101, 201)
+  li section number (e.g. 001 [Leading zeroes must match what appears in Canvas])

@@ -14,7 +14,6 @@ class MetroEnrollmentApp < WolfCore::App
   set :email_body, "Your enrollment data has been processed. "\
                    "Status/Error messages have been added to the attached file"
 
-
   enable :exclude_js
   enable :exclude_css
 
@@ -27,7 +26,11 @@ class MetroEnrollmentApp < WolfCore::App
   ]
 
   get '/' do
-    slim :index
+    slim :index, {
+      :locals => {
+        :header_content => (slim :_header_content, :layout => false)
+      }
+    }
   end
 
   post '/' do
