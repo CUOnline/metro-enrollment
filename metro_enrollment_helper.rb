@@ -116,7 +116,7 @@ module MetroEnrollmentHelper
   def create_user(row)
     payload = {
       'user' => {
-        'name' => "#{row['first_name'].capitalize} #{row['last_name'].capitalize}",
+        'name' => "#{row['first name'].capitalize} #{row['last name'].capitalize}",
       },
       'communication_channel' => {
         'type' => 'email',

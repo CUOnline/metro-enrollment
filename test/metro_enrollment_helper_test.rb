@@ -167,8 +167,8 @@ class MetroEnrollmentHelperTest < Minitest::Test
     user = {
       'id' => 123,
       'email' => 'test@example.com',
-      'first_name' => 'Test',
-      'last_name' => 'Student'
+      'first name' => 'Test',
+      'last name' => 'Student'
     }
     request = stub_request(:post, /accounts\/#{@account_id}\/users/)
                 .to_return(
