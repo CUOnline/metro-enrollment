@@ -192,7 +192,7 @@ class MetroEnrollmentHelperTest < Minitest::Test
         .with(row['course code'])
         .returns(row['course code'])
     self.expects(:canvas_data)
-        .with(regexp_matches(/BIO 101 01.+#{enrollment_term_id}/))
+        .with(anything, regexp_matches(/BIO 101 01/), regexp_matches(/#{enrollment_term_id}/))
         .returns([{'canvas_id' => section_id}])
 
     assert_equal section_id, find_section(row, enrollment_term_id)
@@ -209,7 +209,7 @@ class MetroEnrollmentHelperTest < Minitest::Test
         .with(row['course code'])
         .returns(row['course code'])
     self.expects(:canvas_data)
-        .with(regexp_matches(/BIO 101 01.+#{enrollment_term_id}/))
+        .with(anything, regexp_matches(/BIO 101 01/), regexp_matches(/#{enrollment_term_id}/))
         .returns([])
 
     assert_raises MetroEnrollmentHelper::QueryError do
@@ -229,7 +229,7 @@ class MetroEnrollmentHelperTest < Minitest::Test
         .with(row['course code'])
         .returns(row['course code'])
     self.expects(:canvas_data)
-        .with(regexp_matches(/BIO 101 01.+#{enrollment_term_id}/))
+        .with(anything, regexp_matches(/BIO 101 01/), regexp_matches(/#{enrollment_term_id}/))
         .returns([{'canvas_id' => section_id}, {'canvas_id' => section_id}])
 
     assert_raises MetroEnrollmentHelper::QueryError do

@@ -149,10 +149,10 @@ module MetroEnrollmentHelper
       "JOIN course_section_dim "\
         "ON course_section_dim.course_id = course_dim.id "\
       "WHERE "\
-        "course_section_dim.name = '#{course_name}' AND "\
-        "course_dim.enrollment_term_id = #{enrollment_term_id} "
+        "course_section_dim.name = ? AND "\
+        "course_dim.enrollment_term_id = ?"
 
-    results = canvas_data(query_string)
+    results = canvas_data(query_string, course_name, MetroEnrollmentApp.shard_id(enrollment_term_id))
     if results.count > 1
       raise QueryError, 'Multiple course sections found'
     elsif results.empty?

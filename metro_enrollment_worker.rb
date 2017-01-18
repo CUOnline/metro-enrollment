@@ -4,6 +4,8 @@ class MetroEnrollmentWorker
   def self.perform(csv_rows, enrollment_term_id, email)
     output_rows = [csv_rows.first.keys + ["result message"]]
     csv_rows.each do |row|
+      row.map{ |header, value| value.strip! if value.respond_to?(:strip!) }
+
       begin
         user_id    = MetroEnrollmentApp.find_or_create_user(row)
         section_id = MetroEnrollmentApp.find_section(row, enrollment_term_id)
