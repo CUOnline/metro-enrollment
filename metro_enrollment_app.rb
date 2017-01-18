@@ -9,6 +9,7 @@ class MetroEnrollmentApp < WolfCore::App
   set :root, File.dirname(__FILE__)
   set :logger, create_logger
   set :auth_paths, [/.*/]
+  set :api_cache, false
   set :email_subject, 'Enrollment Results'
   set :email_from, 'Canvas <donotreply@ucdenver.edu>'
   set :email_body, "Your enrollment data has been processed. "\
