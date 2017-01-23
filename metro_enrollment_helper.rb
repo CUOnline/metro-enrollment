@@ -7,7 +7,7 @@ module MetroEnrollmentHelper
     case code
       when 'AST'
         'PHYS'
-      when 'F^A'
+      when 'F^A^'
         'FINE'
       when 'FR^^'
         'FREN'
