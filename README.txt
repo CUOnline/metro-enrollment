@@ -1,0 +1,6 @@
+This app takes a CSV list of Metro State students who are taking CU courses and creates and enrolls them in Canvas. It serves a simple form with a selection for enrollment term and a file upload for the CSV. The form performs basic validation on the CSV fields, and when valid starts a Resque worker to process the data.
+
+The worker first tries to find the specified student if they already exist in Canvas. It searches Canvas Redshift for a user pseudonym (login) with an sis_id or unique_name in the form "metro_#{metro user id}" this is a convention used when adding metro students to Canvas in the past. It will also match on unique_names matching the user's email address. If no results are found, it will proceed to query the API by sis_id, as the API data is usually more up-to-date than Redshift. If no results are found again, the user is created via API with their unique_id set to their email, and their sis_id set to "metro_#{metro user id}".
+
+Next the target section for enrollment is searched for by combining the provided course code, course number and section number. Some course codes differ between UCD and Metro, so the known translations are hard-coded in a switch statement and changed before searching (the CSV contains Metro codes, the query contains translated codes). If a section is found, the existing or newly-created user will be enrolled in it. 
+
